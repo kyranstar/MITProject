@@ -1,4 +1,4 @@
-package main;
+package main.calculations;
 
 public class ThermalCalculations {
 //	public static int maxTemp(){

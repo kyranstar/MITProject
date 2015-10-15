@@ -1,4 +1,4 @@
-package main;
+package main.calculations;
 
 import java.util.stream.IntStream;
 

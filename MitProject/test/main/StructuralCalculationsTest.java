@@ -3,6 +3,8 @@ package main;
 import org.junit.Assert;
 import org.junit.Test;
 
+import main.calculations.StructuralCalculations;
+
 public class StructuralCalculationsTest {
 
 	@Test

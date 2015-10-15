@@ -4,6 +4,8 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.Polygon;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import main.gui.UserInterface;
@@ -27,7 +29,7 @@ public class Grid {
 		drawGrid(g);
 	}
 
-	private void drawGrid(Graphics g) {		
+	private void drawGrid(Graphics g) {
 		g.setColor(Color.BLACK);
 		g.drawString("X", 40, 350);
 		g.drawString("Y", 40, 150);
@@ -41,28 +43,32 @@ public class Grid {
 			for (int y = 0; y < grid[x].length; y++) {
 				Point p = new Point(x, y);
 				grid[x][y].ifPresent((d) -> {
-					int[] xs;
-					int[] ys;
-
-					if (d.isUp()) {
-						xs = new int[] { -UserInterface.GRID_SIZE, UserInterface.GRID_SIZE, 0 };
-						ys = new int[] { UserInterface.GRID_SIZE * 2, UserInterface.GRID_SIZE * 2, 0 };
-					} else {
-						xs = new int[] { -UserInterface.GRID_SIZE, UserInterface.GRID_SIZE, 0 };
-						ys = new int[] { 0, 0, UserInterface.GRID_SIZE * 2 };
-					}
-
-					Polygon tri = new Polygon(xs, ys, 3);
-					Point isoCoord = orthoToIso(p);
-					tri.translate(isoCoord.x, isoCoord.y);
-
-					g.setColor(d.getColor());
-					g.fillPolygon(tri);
-					g.setColor(Color.BLACK);
-					g.drawPolygon(tri);
+					drawDelta(g, p, d, d.isRed() ? Color.RED : Color.BLUE);
 				});
 			}
 		}
+	}
+
+	public void drawDelta(Graphics g, Point p, DeltaType d, Color c) {
+		int[] xs;
+		int[] ys;
+
+		if (d.isUp()) {
+			xs = new int[] { -UserInterface.GRID_SIZE, UserInterface.GRID_SIZE, 0 };
+			ys = new int[] { UserInterface.GRID_SIZE * 2, UserInterface.GRID_SIZE * 2, 0 };
+		} else {
+			xs = new int[] { -UserInterface.GRID_SIZE, UserInterface.GRID_SIZE, 0 };
+			ys = new int[] { 0, 0, UserInterface.GRID_SIZE * 2 };
+		}
+
+		Polygon tri = new Polygon(xs, ys, 3);
+		Point isoCoord = orthoToIso(p);
+		tri.translate(isoCoord.x, isoCoord.y);
+
+		g.setColor(c);
+		g.fillPolygon(tri);
+		g.setColor(Color.BLACK);
+		g.drawPolygon(tri);
 	}
 
 	public static Point orthoToIso(Point p) {
@@ -94,5 +100,29 @@ public class Grid {
 
 	public Optional<DeltaType> getDelta(int x, int y) {
 		return grid[x][y];
+	}
+
+	public List<DeltaSlot> getDeltas() {
+		List<DeltaSlot> deltas = new ArrayList<>();
+		for (int x = 0; x < grid.length; x++) {
+			for (int y = 0; y < grid[x].length; y++) {
+				if (grid[x][y].isPresent()) {
+					deltas.add(new DeltaSlot(x, y, grid[x][y].get()));
+				}
+			}
+		}
+		return deltas;
+	}
+
+	public static class DeltaSlot {
+		public final int x;
+		public final int y;
+		public final DeltaType type;
+
+		public DeltaSlot(int x, int y, DeltaType type) {
+			this.x = x;
+			this.y = y;
+			this.type = type;
+		}
 	}
 }

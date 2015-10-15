@@ -1,17 +1,25 @@
 package main.gui;
 
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Graphics;
+import java.awt.Point;
 import java.awt.event.ItemEvent;
 
 import javax.swing.BoxLayout;
 import javax.swing.JPanel;
 import javax.swing.JToggleButton;
 
+import main.calculations.StructuralCalculations;
+import main.model.Grid;
+
 public class ControlDisplayPanel extends JPanel {
 
-	public ControlDisplayPanel() {
+	private Grid grid;
+
+	public ControlDisplayPanel(Grid grid) {
 		super();
+		this.grid = grid;
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 		add(createIsRedButton());
 		add(createIsUpButton());
@@ -59,6 +67,10 @@ public class ControlDisplayPanel extends JPanel {
 	@Override
 	public void paintComponent(Graphics g){
 		super.paintComponent(g);
+		g.setColor(Color.BLACK);
+		final int TOP = 100;
+		Point cg = StructuralCalculations.centerOfGravity(grid);
+		g.drawString("Center of gravity: (" + cg.x + ", " + cg.y + ")", 10, TOP);
 	}
 
 	private boolean isRed;

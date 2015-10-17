@@ -9,33 +9,35 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.util.Optional;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 
 import main.calculations.StructuralCalculations;
+import main.gui.ControlDisplayPanel.InterfaceTool;
 import main.model.DeltaType;
 import main.model.Grid;
 
 @SuppressWarnings("serial")
 public class UserInterface extends JPanel implements MouseListener, KeyListener, MouseMotionListener {
 
-	private Point mousePosition = new Point(0,0);
+	private Point mousePosition = new Point(0, 0);
 	public static final int INFO_WIDTH = 200;
 	public static final int GRID_WIDTH = 500;
 	public static final int HEIGHT = 500;
 	public static final int GRID_SIZE = 20;
 
-	private Grid grid = new Grid(GRID_WIDTH / GRID_SIZE, HEIGHT / GRID_SIZE);
+	private final Grid grid = new Grid(GRID_WIDTH / GRID_SIZE, HEIGHT / GRID_SIZE);
 
-	private ControlDisplayPanel controlsAndDisplay = new ControlDisplayPanel(grid);
+	private final ControlDisplayPanel controlsAndDisplay = new ControlDisplayPanel(grid);
 
-	public static void main(String[] args) {
-		JFrame frame = new JFrame();
-		UserInterface panel = new UserInterface();
+	public static void main(final String[] args) {
+		final JFrame frame = new JFrame();
+		final UserInterface panel = new UserInterface();
 
-		JSplitPane split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+		final JSplitPane split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
 		split.setLeftComponent(panel);
 		split.setRightComponent(panel.controlsAndDisplay);
 
@@ -56,78 +58,100 @@ public class UserInterface extends JPanel implements MouseListener, KeyListener,
 	}
 
 	@Override
-	protected void paintComponent(Graphics g) {
+	protected void paintComponent(final Graphics g) {
 		g.setColor(Color.WHITE);
 		g.fillRect(0, 0, getWidth(), getHeight());
 		grid.draw(g);
-		
-		
-		DeltaType d = DeltaType.getDelta(controlsAndDisplay.isRed(), controlsAndDisplay.isUp());
-		Point p = Grid.isoToOrtho(mousePosition);
-		grid.drawDelta(g, p, d, d.isRed() ? new Color(255,0,0,100) : new Color(0,0,255, 100));
-		
-		g.setColor(Color.DARK_GRAY);
-		Point cg = Grid.orthoToIso(StructuralCalculations.centerOfGravity(grid));
-		g.fillOval(cg.x - 5, cg.y - 5, 10, 10);
+
+		final DeltaType d = DeltaType.getDelta(controlsAndDisplay.isRed(), controlsAndDisplay.isUp());
+		final Point p = Grid.isoToOrtho(mousePosition);
+		grid.drawDelta(g, p, d, d.isRed() ? new Color(255, 0, 0, 100) : new Color(0, 0, 255, 100));
+
+		if (controlsAndDisplay.isThermalInfo()) {
+		} else {
+			g.setColor(Color.DARK_GRAY);
+			final Point cg = Grid.orthoToIso(StructuralCalculations.centerOfGravity(grid));
+			g.fillOval(cg.x - 5, cg.y - 5, 10, 10);
+
+			// sorry for writing this mess
+			// for each anchor in screen c
+			grid.getAnchors().stream().forEach((anchor) -> {
+				final Point screenAnchorA = Grid.orthoToIso(anchor);
+
+				g.setColor(new Color(0, 255, 100));
+				g.fillOval(screenAnchorA.x - 5, screenAnchorA.y - 5 + GRID_SIZE, 10, 10);
+				final Optional<Point> anchorB = grid.getAnchors().stream().filter((b) -> !b.equals(anchor)).findFirst();
+				if (anchorB.isPresent()) {
+					final Point anchorForce = StructuralCalculations.supportLoadA(anchor, anchorB.get(), grid);
+					g.drawString("(" + anchorForce.x + ", " + anchorForce.y + ")", screenAnchorA.x - 10, screenAnchorA.y + 15 + GRID_SIZE);
+				}
+			});
+		}
 	}
 
 	@Override
-	public void mouseClicked(MouseEvent e) {
-		Point ortho = Grid.isoToOrtho(e.getPoint());
-		if (controlsAndDisplay.isRemoving()) {
+	public void mouseClicked(final MouseEvent e) {
+		final Point ortho = Grid.isoToOrtho(e.getPoint());
+		if (controlsAndDisplay.getTool() == InterfaceTool.REMOVE_TRIANGLE) {
 			grid.removeDelta(ortho.x, ortho.y);
-		} else {
-			DeltaType delta = DeltaType.getDelta(controlsAndDisplay.isRed(), controlsAndDisplay.isUp());
+		} else if (controlsAndDisplay.getTool() == InterfaceTool.ADD_TRIANGLE) {
+			final DeltaType delta = DeltaType.getDelta(controlsAndDisplay.isRed(), controlsAndDisplay.isUp());
 			grid.setDelta(ortho.x, ortho.y, delta);
+		} else if (controlsAndDisplay.getTool() == InterfaceTool.ADD_ANCHOR) {
+			if (grid.getAnchors().size() < 2) {
+				grid.getAnchors().add(ortho);
+			}
+		} else if (controlsAndDisplay.getTool() == InterfaceTool.REMOVE_ANCHOR) {
+			grid.getAnchors().remove(ortho);
 		}
 		repaint();
 		controlsAndDisplay.repaint();
 	}
 
 	@Override
-	public void mouseEntered(MouseEvent e) {
+	public void mouseEntered(final MouseEvent e) {
 
 	}
 
 	@Override
-	public void mouseExited(MouseEvent e) {
+	public void mouseExited(final MouseEvent e) {
 
 	}
 
 	@Override
-	public void mousePressed(MouseEvent e) {
+	public void mousePressed(final MouseEvent e) {
 	}
 
 	@Override
-	public void mouseReleased(MouseEvent e) {
-
-	}
-
-	@Override
-	public void keyPressed(KeyEvent e) {
+	public void mouseReleased(final MouseEvent e) {
 
 	}
 
 	@Override
-	public void keyReleased(KeyEvent arg0) {
+	public void keyPressed(final KeyEvent e) {
+
+	}
+
+	@Override
+	public void keyReleased(final KeyEvent arg0) {
 		// TODO Auto-generated method stub
 
 	}
 
 	@Override
-	public void keyTyped(KeyEvent arg0) {
+	public void keyTyped(final KeyEvent arg0) {
 		// TODO Auto-generated method stub
 
 	}
 
 	@Override
-	public void mouseDragged(MouseEvent e) {
+	public void mouseDragged(final MouseEvent e) {
 		mousePosition = e.getPoint();
 		repaint();
 	}
 
 	@Override
-	public void mouseMoved(MouseEvent e) {
+	public void mouseMoved(final MouseEvent e) {
 		mousePosition = e.getPoint();
 		repaint();
 	}

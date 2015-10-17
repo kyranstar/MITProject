@@ -5,18 +5,21 @@ import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.Polygon;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import main.gui.UserInterface;
 
 public class Grid {
 
-	private Optional<DeltaType>[][] grid;
+	private final Optional<DeltaType>[][] grid;
+	private final Set<Point> anchors = new HashSet<>();
 
 	@SuppressWarnings("unchecked")
-	public Grid(int width, int height) {
-		grid = (Optional<DeltaType>[][]) new Optional[width][height];
+	public Grid(final int width, final int height) {
+		grid = new Optional[width][height];
 
 		for (int x = 0; x < width; x++) {
 			for (int y = 0; y < height; y++) {
@@ -25,11 +28,11 @@ public class Grid {
 		}
 	}
 
-	public void draw(Graphics g) {
+	public void draw(final Graphics g) {
 		drawGrid(g);
 	}
 
-	private void drawGrid(Graphics g) {
+	private void drawGrid(final Graphics g) {
 		g.setColor(Color.BLACK);
 		g.drawString("X", 40, 350);
 		g.drawString("Y", 40, 150);
@@ -41,7 +44,7 @@ public class Grid {
 		}
 		for (int x = 0; x < grid.length; x++) {
 			for (int y = 0; y < grid[x].length; y++) {
-				Point p = new Point(x, y);
+				final Point p = new Point(x, y);
 				grid[x][y].ifPresent((d) -> {
 					drawDelta(g, p, d, d.isRed() ? Color.RED : Color.BLUE);
 				});
@@ -49,7 +52,7 @@ public class Grid {
 		}
 	}
 
-	public void drawDelta(Graphics g, Point p, DeltaType d, Color c) {
+	public void drawDelta(final Graphics g, final Point p, final DeltaType d, final Color c) {
 		int[] xs;
 		int[] ys;
 
@@ -61,8 +64,8 @@ public class Grid {
 			ys = new int[] { 0, 0, UserInterface.GRID_SIZE * 2 };
 		}
 
-		Polygon tri = new Polygon(xs, ys, 3);
-		Point isoCoord = orthoToIso(p);
+		final Polygon tri = new Polygon(xs, ys, 3);
+		final Point isoCoord = orthoToIso(p);
 		tri.translate(isoCoord.x, isoCoord.y);
 
 		g.setColor(c);
@@ -71,39 +74,40 @@ public class Grid {
 		g.drawPolygon(tri);
 	}
 
-	public static Point orthoToIso(Point p) {
-		int x = p.x * UserInterface.GRID_SIZE;
-		int y = p.y * UserInterface.GRID_SIZE;
-		int screenX = (x + y) / 2;
-		int screenY = (x - y);
+	public static Point orthoToIso(final Point p) {
+		final int x = p.x * UserInterface.GRID_SIZE;
+		final int y = p.y * UserInterface.GRID_SIZE;
+		final int screenX = (x + y) / 2;
+		final int screenY = x - y;
 
 		return new Point(screenX + UserInterface.GRID_WIDTH / 4, screenY + UserInterface.HEIGHT / 2);
 	}
 
-	public static Point isoToOrtho(Point p) {
-		Point iso = new Point(p.x - UserInterface.GRID_WIDTH / 4, p.y - UserInterface.HEIGHT / 2);
-		int cartY = (2 * iso.x - iso.y) / 2;
-		int cartX = (2 * iso.x + iso.y) / 2;
+	public static Point isoToOrtho(final Point p) {
+		final Point iso = new Point(p.x - UserInterface.GRID_WIDTH / 4, p.y - UserInterface.HEIGHT / 2);
+		final int cartY = (2 * iso.x - iso.y) / 2;
+		final int cartX = (2 * iso.x + iso.y) / 2;
 
 		return new Point(cartX / UserInterface.GRID_SIZE, cartY / UserInterface.GRID_SIZE);
 	}
 
-	public void setDelta(int x, int y, DeltaType t) {
-		if (x < 0 || x >= grid.length || y < 0 || y >= grid[0].length)
+	public void setDelta(final int x, final int y, final DeltaType t) {
+		if (x < 0 || x >= grid.length || y < 0 || y >= grid[0].length) {
 			return;
+		}
 		grid[x][y] = Optional.of(t);
 	}
 
-	public void removeDelta(int x, int y) {
+	public void removeDelta(final int x, final int y) {
 		grid[x][y] = Optional.empty();
 	}
 
-	public Optional<DeltaType> getDelta(int x, int y) {
+	public Optional<DeltaType> getDelta(final int x, final int y) {
 		return grid[x][y];
 	}
 
 	public List<DeltaSlot> getDeltas() {
-		List<DeltaSlot> deltas = new ArrayList<>();
+		final List<DeltaSlot> deltas = new ArrayList<>();
 		for (int x = 0; x < grid.length; x++) {
 			for (int y = 0; y < grid[x].length; y++) {
 				if (grid[x][y].isPresent()) {
@@ -114,12 +118,16 @@ public class Grid {
 		return deltas;
 	}
 
+	public Set<Point> getAnchors() {
+		return anchors;
+	}
+
 	public static class DeltaSlot {
 		public final int x;
 		public final int y;
 		public final DeltaType type;
 
-		public DeltaSlot(int x, int y, DeltaType type) {
+		public DeltaSlot(final int x, final int y, final DeltaType type) {
 			this.x = x;
 			this.y = y;
 			this.type = type;

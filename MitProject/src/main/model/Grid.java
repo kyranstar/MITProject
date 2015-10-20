@@ -133,4 +133,9 @@ public class Grid {
 			this.type = type;
 		}
 	}
+
+	public float percentBlue() {
+		int numBlue = (int) getDeltas().stream().filter((d) -> !d.type.isRed()).count();
+		return (float) numBlue / getDeltas().size() * 100;
+	}
 }

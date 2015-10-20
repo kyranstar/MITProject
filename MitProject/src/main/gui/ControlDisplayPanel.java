@@ -5,6 +5,7 @@ import java.awt.Component;
 import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.event.ItemEvent;
+import java.text.DecimalFormat;
 
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
@@ -37,7 +38,7 @@ public class ControlDisplayPanel extends JPanel {
 			} else if (e.getStateChange() == ItemEvent.DESELECTED) {
 				isThermalInfo = false;
 			}
-
+			ControlDisplayPanel.super.repaint();
 		});
 		return button;
 	}
@@ -103,6 +104,7 @@ public class ControlDisplayPanel extends JPanel {
 			final Point cg = StructuralCalculations.centerOfGravity(grid);
 			g.drawString("Center of gravity: (" + cg.x + ", " + cg.y + ")", 10, TOP);
 		}
+		g.drawString(new DecimalFormat("Percent blue: #.##").format(grid.percentBlue()), 10, TOP + 15);
 	}
 
 	private boolean isThermalInfo;

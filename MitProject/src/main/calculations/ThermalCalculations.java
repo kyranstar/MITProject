@@ -1,5 +1,6 @@
 package main.calculations;
 
+import main.model.DeltaType.Delta;
 import main.model.Grid;
 
 public class ThermalCalculations {
@@ -15,22 +16,18 @@ public class ThermalCalculations {
 	}
 
 	public static int aveTemp(Grid grid) {
-		return (numRedDeltas(grid) * q0) / (numRadiatingDeltas(grid) * averageRadiatingLength(grid) * kr);
+		return (int) Math.round((numRedDeltas(grid) * q0) / (numRadiatingDeltas(grid) * averageRadiatingLength(grid) * kr));
 	}
 
-	private static int averageRadiatingLength(Grid grid) {
-		return grid.getDeltas().stream().mapToInt((d) -> radiantLength(grid, d.x, d.y)).sum() / grid.getDeltas().size();
+	private static double averageRadiatingLength(Grid grid) {
+		return grid.getDeltas().stream().mapToDouble((d) -> d.delta.amountRadiating).sum() / numRadiatingDeltas(grid);
 	}
 
 	private static int numRedDeltas(Grid grid) {
-		return (int) grid.getDeltas().stream().filter((d) -> d.type.isRed()).count();
+		return (int) grid.getDeltas().stream().filter((d) -> d.delta.type.isRed()).count();
 	}
 
 	private static int numRadiatingDeltas(Grid grid) {
-		return 0;
-	}
-
-	private static int radiantLength(Grid grid, int x, int y) {
-		return 0;
+		return (int) grid.getDeltas().stream().filter((d) -> d.delta.amountRadiating != 0).count();
 	}
 }

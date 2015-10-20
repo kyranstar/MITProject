@@ -11,10 +11,12 @@ import java.util.Optional;
 import java.util.Set;
 
 import main.gui.UserInterface;
+import main.model.DeltaType.Delta;
+import main.model.Grid.DeltaSlot;
 
 public class Grid {
 
-	private final Optional<DeltaType>[][] grid;
+	private final Optional<Delta>[][] grid;
 	private final Set<Point> anchors = new HashSet<>();
 
 	@SuppressWarnings("unchecked")
@@ -46,17 +48,17 @@ public class Grid {
 			for (int y = 0; y < grid[x].length; y++) {
 				final Point p = new Point(x, y);
 				grid[x][y].ifPresent((d) -> {
-					drawDelta(g, p, d, d.isRed() ? Color.RED : Color.BLUE);
+					drawDelta(g, p, d, d.type.isRed() ? Color.RED : Color.BLUE);
 				});
 			}
 		}
 	}
 
-	public void drawDelta(final Graphics g, final Point p, final DeltaType d, final Color c) {
+	public void drawDelta(final Graphics g, final Point p, final Delta d, final Color c) {
 		int[] xs;
 		int[] ys;
 
-		if (d.isUp()) {
+		if (d.type.isUp()) {
 			xs = new int[] { -UserInterface.GRID_SIZE, UserInterface.GRID_SIZE, 0 };
 			ys = new int[] { UserInterface.GRID_SIZE * 2, UserInterface.GRID_SIZE * 2, 0 };
 		} else {
@@ -72,6 +74,9 @@ public class Grid {
 		g.fillPolygon(tri);
 		g.setColor(Color.BLACK);
 		g.drawPolygon(tri);
+
+		g.setColor(Color.MAGENTA);
+		g.drawString(String.valueOf(d.amountRadiating), (int)(isoCoord.getX() + UserInterface.GRID_SIZE / 2) - 20, (int)(isoCoord.getY() + UserInterface.GRID_SIZE / 2));
 	}
 
 	public static Point orthoToIso(final Point p) {
@@ -91,7 +96,7 @@ public class Grid {
 		return new Point(cartX / UserInterface.GRID_SIZE, cartY / UserInterface.GRID_SIZE);
 	}
 
-	public void setDelta(final int x, final int y, final DeltaType t) {
+	public void setDelta(final int x, final int y, final Delta t) {
 		if (x < 0 || x >= grid.length || y < 0 || y >= grid[0].length) {
 			return;
 		}
@@ -102,7 +107,7 @@ public class Grid {
 		grid[x][y] = Optional.empty();
 	}
 
-	public Optional<DeltaType> getDelta(final int x, final int y) {
+	public Optional<Delta> getDelta(final int x, final int y) {
 		return grid[x][y];
 	}
 
@@ -125,17 +130,17 @@ public class Grid {
 	public static class DeltaSlot {
 		public final int x;
 		public final int y;
-		public final DeltaType type;
+		public final Delta delta;
 
-		public DeltaSlot(final int x, final int y, final DeltaType type) {
+		public DeltaSlot(final int x, final int y, final Delta type) {
 			this.x = x;
 			this.y = y;
-			this.type = type;
+			this.delta = type;
 		}
 	}
 
 	public float percentBlue() {
-		int numBlue = (int) getDeltas().stream().filter((d) -> !d.type.isRed()).count();
+		int numBlue = (int) getDeltas().stream().filter((d) -> !d.delta.type.isRed()).count();
 		return (float) numBlue / getDeltas().size() * 100;
 	}
 }

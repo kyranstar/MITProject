@@ -57,4 +57,13 @@ public enum DeltaType {
 				.filter((d) -> d.isUp() == isUp && d.isRed() == isRed)
 				.findFirst().get();
 	}
+	public static class Delta{
+		public final DeltaType type;
+		public final float amountRadiating;
+		
+		public Delta(DeltaType type, float amountRadiating){
+			this.type = type;
+			this.amountRadiating = amountRadiating;
+		}
+	}
 }

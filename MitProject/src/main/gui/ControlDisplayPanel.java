@@ -14,6 +14,7 @@ import javax.swing.JRadioButton;
 import javax.swing.JToggleButton;
 
 import main.calculations.StructuralCalculations;
+import main.calculations.ThermalCalculations;
 import main.model.Grid;
 
 public class ControlDisplayPanel extends JPanel {
@@ -99,7 +100,13 @@ public class ControlDisplayPanel extends JPanel {
 		g.setColor(Color.BLACK);
 		final int TOP = 250;
 		if (isThermalInfo()) {
-
+			int aveTemp;
+			try {
+				aveTemp = ThermalCalculations.aveTemp(grid);
+			} catch (ArithmeticException e) {
+				aveTemp = -1;
+			}
+			g.drawString("Average temperature: " + (aveTemp == -1 ? "Undefined" : String.valueOf(aveTemp)), 10, TOP);
 		} else {
 			final Point cg = StructuralCalculations.centerOfGravity(grid);
 			g.drawString("Center of gravity: (" + cg.x + ", " + cg.y + ")", 10, TOP);
@@ -129,9 +136,6 @@ public class ControlDisplayPanel extends JPanel {
 	}
 
 	public static enum InterfaceTool {
-		ADD_TRIANGLE,
-		REMOVE_TRIANGLE,
-		ADD_ANCHOR,
-		REMOVE_ANCHOR;
+		ADD_TRIANGLE, REMOVE_TRIANGLE, ADD_ANCHOR, REMOVE_ANCHOR;
 	}
 }

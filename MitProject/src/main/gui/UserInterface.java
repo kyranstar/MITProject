@@ -12,12 +12,14 @@ import java.awt.event.MouseMotionListener;
 import java.util.Optional;
 
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 
 import main.calculations.StructuralCalculations;
 import main.gui.ControlDisplayPanel.InterfaceTool;
 import main.model.DeltaType;
+import main.model.DeltaType.Delta;
 import main.model.Grid;
 
 @SuppressWarnings("serial")
@@ -65,7 +67,7 @@ public class UserInterface extends JPanel implements MouseListener, KeyListener,
 
 		final DeltaType d = DeltaType.getDelta(controlsAndDisplay.isRed(), controlsAndDisplay.isUp());
 		final Point p = Grid.isoToOrtho(mousePosition);
-		grid.drawDelta(g, p, d, d.isRed() ? new Color(255, 0, 0, 100) : new Color(0, 0, 255, 100));
+		grid.drawDelta(g, p, new Delta(d, 0), d.isRed() ? new Color(255, 0, 0, 100) : new Color(0, 0, 255, 100));
 
 		if (controlsAndDisplay.isThermalInfo()) {
 		} else {
@@ -83,7 +85,8 @@ public class UserInterface extends JPanel implements MouseListener, KeyListener,
 				final Optional<Point> anchorB = grid.getAnchors().stream().filter((b) -> !b.equals(anchor)).findFirst();
 				if (anchorB.isPresent()) {
 					final Point anchorForce = StructuralCalculations.supportLoadA(anchor, anchorB.get(), grid);
-					g.drawString("(" + anchorForce.x + ", " + anchorForce.y + ")", screenAnchorA.x - 10, screenAnchorA.y + 15 + GRID_SIZE);
+					g.drawString("(" + anchorForce.x + ", " + anchorForce.y + ")", screenAnchorA.x - 10,
+							screenAnchorA.y + 15 + GRID_SIZE);
 				}
 			});
 		}
@@ -92,11 +95,22 @@ public class UserInterface extends JPanel implements MouseListener, KeyListener,
 	@Override
 	public void mouseClicked(final MouseEvent e) {
 		final Point ortho = Grid.isoToOrtho(e.getPoint());
-		if (controlsAndDisplay.getTool() == InterfaceTool.REMOVE_TRIANGLE) {
+		if (e.getClickCount() >= 2) {
+			if (grid.getDelta(ortho.x, ortho.y).isPresent()) {
+				String radiatingNum = JOptionPane.showInputDialog("Radiating length: ");
+				if (radiatingNum != null && !radiatingNum.isEmpty()) {
+					grid.setDelta(ortho.x, ortho.y,
+							new Delta(grid.getDelta(ortho.x, ortho.y).get().type, Float.parseFloat(radiatingNum)));
+				}
+			}
+		} else if (controlsAndDisplay.getTool() == InterfaceTool.REMOVE_TRIANGLE) {
 			grid.removeDelta(ortho.x, ortho.y);
 		} else if (controlsAndDisplay.getTool() == InterfaceTool.ADD_TRIANGLE) {
+			if (grid.getDelta(ortho.x, ortho.y).isPresent())
+				return;
+
 			final DeltaType delta = DeltaType.getDelta(controlsAndDisplay.isRed(), controlsAndDisplay.isUp());
-			grid.setDelta(ortho.x, ortho.y, delta);
+			grid.setDelta(ortho.x, ortho.y, new Delta(delta, 0));
 		} else if (controlsAndDisplay.getTool() == InterfaceTool.ADD_ANCHOR) {
 			if (grid.getAnchors().size() < 2) {
 				grid.getAnchors().add(ortho);

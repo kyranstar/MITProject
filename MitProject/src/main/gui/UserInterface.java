@@ -15,6 +15,7 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
+import javax.swing.SwingUtilities;
 
 import main.calculations.StructuralCalculations;
 import main.gui.ControlDisplayPanel.InterfaceTool;
@@ -95,6 +96,8 @@ public class UserInterface extends JPanel implements MouseListener, KeyListener,
 	@Override
 	public void mouseClicked(final MouseEvent e) {
 		final Point ortho = Grid.isoToOrtho(e.getPoint());
+		if(SwingUtilities.isRightMouseButton(e)) return;
+		
 		if (e.getClickCount() >= 2) {
 			if (grid.getDelta(ortho.x, ortho.y).isPresent()) {
 				String radiatingNum = JOptionPane.showInputDialog("Radiating length: ");
@@ -134,6 +137,9 @@ public class UserInterface extends JPanel implements MouseListener, KeyListener,
 
 	@Override
 	public void mousePressed(final MouseEvent e) {
+		if (SwingUtilities.isRightMouseButton(e)) {
+			controlsAndDisplay.isUp = !controlsAndDisplay.isUp;
+		}
 	}
 
 	@Override

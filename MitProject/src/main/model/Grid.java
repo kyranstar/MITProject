@@ -1,6 +1,7 @@
 package main.model;
 
 import java.awt.Color;
+import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.Polygon;
@@ -12,7 +13,6 @@ import java.util.Set;
 
 import main.gui.UserInterface;
 import main.model.DeltaType.Delta;
-import main.model.Grid.DeltaSlot;
 
 public class Grid {
 
@@ -75,8 +75,14 @@ public class Grid {
 		g.setColor(Color.BLACK);
 		g.drawPolygon(tri);
 
-		g.setColor(Color.MAGENTA);
-		g.drawString(String.valueOf(d.amountRadiating), (int)(isoCoord.getX() + UserInterface.GRID_SIZE / 2) - 20, (int)(isoCoord.getY() + UserInterface.GRID_SIZE / 2));
+		if (d.amountRadiating != 0) {
+			g.setColor(Color.MAGENTA);
+			FontMetrics fm = g.getFontMetrics();
+			String radiatingString = String.valueOf(d.amountRadiating);
+			g.drawString(radiatingString, (int) (isoCoord.getX() - fm.stringWidth(radiatingString) / 2),
+					(int) (isoCoord.getY() + UserInterface.GRID_SIZE / 2) + fm.getHeight() / 2);
+
+		}
 	}
 
 	public static Point orthoToIso(final Point p) {

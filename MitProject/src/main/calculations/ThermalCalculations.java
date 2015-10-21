@@ -1,6 +1,5 @@
 package main.calculations;
 
-import main.model.DeltaType.Delta;
 import main.model.Grid;
 
 public class ThermalCalculations {

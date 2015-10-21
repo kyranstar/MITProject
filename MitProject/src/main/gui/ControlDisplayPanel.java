@@ -17,6 +17,7 @@ import main.calculations.StructuralCalculations;
 import main.calculations.ThermalCalculations;
 import main.model.Grid;
 
+@SuppressWarnings("serial")
 public class ControlDisplayPanel extends JPanel {
 
 	private final Grid grid;
@@ -26,7 +27,6 @@ public class ControlDisplayPanel extends JPanel {
 		this.grid = grid;
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 		add(createIsRedButton());
-		add(createIsUpButton());
 		createToolChooser();
 		add(createIsThermalInfo());
 	}
@@ -68,19 +68,6 @@ public class ControlDisplayPanel extends JPanel {
 		addTri.setSelected(true);
 	}
 
-	private Component createIsUpButton() {
-		final JToggleButton button = new JToggleButton("Create upwards triangles?");
-		button.addItemListener((e) -> {
-			if (e.getStateChange() == ItemEvent.SELECTED) {
-				isUp = true;
-			} else if (e.getStateChange() == ItemEvent.DESELECTED) {
-				isUp = false;
-			}
-
-		});
-		return button;
-	}
-
 	private Component createIsRedButton() {
 		final JToggleButton button = new JToggleButton("Create red triangles?");
 		button.addItemListener((e) -> {
@@ -116,7 +103,7 @@ public class ControlDisplayPanel extends JPanel {
 
 	private boolean isThermalInfo;
 	private boolean isRed;
-	private boolean isUp;
+	boolean isUp;
 	private InterfaceTool tool = InterfaceTool.ADD_TRIANGLE;
 
 	public boolean isThermalInfo() {
